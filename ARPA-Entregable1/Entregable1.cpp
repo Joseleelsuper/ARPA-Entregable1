@@ -12,7 +12,7 @@ constexpr int TAG = 0;              // Etiqueta para los mensajes
     * @param n Número entero.
     * @return Factorial de n.
  */
-long int calculateFactorial(int n);
+long double calculateFactorial(int n);
 
 /*
 	* Programa principal.
@@ -35,7 +35,11 @@ int main(int argc, char* argv[]) {
     if (rank == RANK_MASTER) {
         while (true) {
             printf("Introduce un número (-1 para salir): ");
-            cin >> number;
+            while (!(cin >> number)) {
+                cin.clear(); // Limpiar el estado de error
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Descartar la entrada inválida
+                printf("Entrada inválida. Por favor, introduce un número (-1 para salir): ");
+            }
 
             // Enviar el número al proceso trabajador de manera no bloqueante
             MPI_Isend(&number, 1, MPI_INT, RANK_WORKER, TAG, MPI_COMM_WORLD, &request);
@@ -52,7 +56,7 @@ int main(int argc, char* argv[]) {
             // Esperar a que la recepción se complete
             MPI_Wait(&request, &status);
 
-			printf("%d! = %ld\n\n", number, result);
+			printf("%d! = %ld\n", number, result);
         }
     }
     else if (rank == RANK_WORKER) {
@@ -82,8 +86,8 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-long int calculateFactorial(int n) {
-    long int factorial = 1;
+long double calculateFactorial(int n) {
+    long double factorial = 1;
     for (int i = 1; i <= n; i++) {
         factorial *= i;
     }
