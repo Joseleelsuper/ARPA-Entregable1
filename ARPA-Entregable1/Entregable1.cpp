@@ -6,6 +6,7 @@ using namespace std;
 constexpr int RANK_MASTER = 0;      // Rango del proceso maestro
 constexpr int RANK_WORKER = 1;      // Rango del proceso trabajador
 constexpr int TAG = 0;              // Etiqueta para los mensajes
+constexpr int NUM_DATOS = 1;        // Datos a enviar/recibir
 
 /*
     * Calcula el factorial de un número entero.
@@ -27,8 +28,8 @@ int main(int argc, char* argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    int number;
-    long int result;
+    int number = 0;
+    long double result = 0;
     MPI_Request request;
     MPI_Status status;
 
@@ -42,7 +43,7 @@ int main(int argc, char* argv[]) {
             }
 
             // Enviar el número al proceso trabajador de manera no bloqueante
-            MPI_Isend(&number, 1, MPI_INT, RANK_WORKER, TAG, MPI_COMM_WORLD, &request);
+            MPI_Isend(&number, NUM_DATOS, MPI_INT, RANK_WORKER, TAG, MPI_COMM_WORLD, &request);
 
             if (number == -1) {
                 break; // Condición de salida
@@ -51,18 +52,18 @@ int main(int argc, char* argv[]) {
             printf("Esperando resultado...\n");
 
             // Recibir el resultado del proceso trabajador de manera no bloqueante
-            MPI_Irecv(&result, 1, MPI_LONG, RANK_WORKER, TAG, MPI_COMM_WORLD, &request);
+            MPI_Irecv(&result, NUM_DATOS, MPI_LONG_DOUBLE, RANK_WORKER, TAG, MPI_COMM_WORLD, &request);
 
             // Esperar a que la recepción se complete
             MPI_Wait(&request, &status);
 
-			printf("%d! = %ld\n", number, result);
+			printf("%d! = %.0lf\n", number, result);
         }
     }
     else if (rank == RANK_WORKER) {
         while (true) {
             // Recibir el número del proceso maestro de manera no bloqueante
-            MPI_Irecv(&number, 1, MPI_INT, RANK_MASTER, TAG, MPI_COMM_WORLD, &request);
+            MPI_Irecv(&number, NUM_DATOS, MPI_INT, RANK_MASTER, TAG, MPI_COMM_WORLD, &request);
 
             // Esperar a que la recepción se complete
             MPI_Wait(&request, &status);
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]) {
             result = calculateFactorial(number);
 
             // Enviar el resultado al proceso maestro de manera no bloqueante
-            MPI_Isend(&result, 1, MPI_LONG, RANK_MASTER, TAG, MPI_COMM_WORLD, &request);
+            MPI_Isend(&result, NUM_DATOS, MPI_LONG_DOUBLE, RANK_MASTER, TAG, MPI_COMM_WORLD, &request);
 
             // Esperar a que el envío se complete
             MPI_Wait(&request, &status);
