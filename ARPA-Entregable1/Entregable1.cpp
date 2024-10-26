@@ -9,17 +9,17 @@ constexpr int TAG = 0;              // Etiqueta para los mensajes
 constexpr int NUM_DATOS = 1;        // Datos a enviar/recibir
 
 /*
-    * Calcula el factorial de un número entero.
-    * @param n Número entero.
-    * @return Factorial de n.
+ * Calcula el factorial de un número entero.
+ * @param n Número entero.
+ * @return Factorial de n.
  */
 long double calculateFactorial(int n);
 
 /*
-	* Programa principal.
-	* @param argc Cantidad de argumentos.
-	* @param argv Argumentos.
-	* @return Código de salida.
+ * Programa principal.
+ * @param argc Cantidad de argumentos.
+ * @param argv Argumentos.
+ * @return Código de salida.
 */
 int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
@@ -27,6 +27,11 @@ int main(int argc, char* argv[]) {
     int rank, size = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    if (size < 2) {
+        printf("ERROR: No hay procesos suficientes para ejecutar el programa. (%d < 2)", size);
+        MPI_Abort(MPI_COMM_WORLD);
+    }
 
     int number = 0;
     long double result = 0;
