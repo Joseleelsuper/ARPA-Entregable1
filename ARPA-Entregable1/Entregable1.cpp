@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
     if (size < 2) {
         printf("ERROR: No hay procesos suficientes para ejecutar el programa. (%d < 2)", size);
-        MPI_Abort(MPI_COMM_WORLD);
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     int number = 0;
